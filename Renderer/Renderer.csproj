@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\HtmlRenderer\FileOut\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Factory\Factory.csproj" />
   </ItemGroup>
 

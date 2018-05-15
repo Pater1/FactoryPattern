@@ -6,10 +6,24 @@ using System.Threading.Tasks;
 using Factory.Components;
 using Factory.Renderer.FileOut;
 
-namespace Factory.Components.Renderer {
+namespace Factory.Renderer {
 
     public abstract class ComponentRenderer<R>: ICollection<ComponentRenderer<R>> where R : RenderOut {
-        internal ICollection<ComponentRenderer<R>> children;
+        protected object data;
+        public object _RendererDataObject { 
+            get {
+                return data;
+            }
+            internal set {
+                data = value;
+            }
+        }
+        protected ComponentRenderer(object RendererDataObject) {
+            _RendererDataObject = RendererDataObject;
+        }
+        internal ComponentRenderer() { }
+
+        internal ICollection<ComponentRenderer<R>> children = new List<ComponentRenderer<R>>();
         
         public virtual void RenderChildren(R writer) {
             foreach(ComponentRenderer<R> child in children) {
@@ -22,6 +36,8 @@ namespace Factory.Components.Renderer {
             Render(writer);
             return Task.CompletedTask;
         }
+
+        public ComponentRenderer<D,R> UpConvert<D>() where D: Component => this as ComponentRenderer<D, R>;
 
         #region ICollection<ComponentRenderer>
         public int Count => children.Count;
@@ -64,8 +80,15 @@ namespace Factory.Components.Renderer {
         protected ComponentRenderer(D RendererDataObject) {
             _RendererDataObject = RendererDataObject;
         }
-        //internal CompnentRenderer() { }
-        
-        public D _RendererDataObject { get; internal set; }
+        internal ComponentRenderer() { }
+
+        public new D _RendererDataObject {
+            get {
+                return (D)base._RendererDataObject;
+            }
+            internal set {
+                base._RendererDataObject = value;
+            }
+        }
     }
 }

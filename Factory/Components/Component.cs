@@ -57,6 +57,22 @@ namespace Factory.Components {
         public virtual ChildrenHandling ChildrenSupported => ChildrenHandling.none;
 
         private List<Component> children = new List<Component>();
+        public virtual List<Component> Children {
+            get {
+                if((ChildrenSupported & ChildrenHandling.multiple) == 0) {
+                    throw new NotImplementedException("This component does not support multiple children");
+                }
+                
+                return children;
+            }
+            set {
+                if((ChildrenSupported & ChildrenHandling.multiple) == 0) {
+                    throw new NotImplementedException("This component does not support multiple children");
+                }
+
+                children = value;
+            }
+        }
 
 
         public virtual void Add(Component child) {
@@ -69,7 +85,7 @@ namespace Factory.Components {
         public virtual Component Child {
             get {
                 if((ChildrenSupported & ChildrenHandling.single) == 0) {
-                    throw new NotImplementedException("This component does not support multiple children");
+                    throw new NotImplementedException("This component does not support single children");
                 }
 
                 if(Count < 1) {
@@ -80,7 +96,7 @@ namespace Factory.Components {
             }
             set {
                 if((ChildrenSupported & ChildrenHandling.single) == 0) {
-                    throw new NotImplementedException("This component does not support multiple children");
+                    throw new NotImplementedException("This component does not support single children");
                 }
 
                 if(Count < 1) {

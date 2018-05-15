@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Factory.Renderer.FileOut {
     public abstract class RenderOut: IDisposable {
-        protected Dictionary<string, StreamWriter> writers;
-        public StreamWriter this[string key]{
+        protected Dictionary<string, FileOut> writers = new Dictionary<string, FileOut>();
+        public FileOut this[string key]{
             get{
                 return writers[key];
             }
@@ -34,8 +35,8 @@ namespace Factory.Renderer.FileOut {
             if(filesWithExtentionAndAlias != null) {
                 foreach((string file,string alias) file in filesWithExtentionAndAlias) {
                     string path = Path.Combine(folderPath, file.file);
-                    
-                    StreamWriter strm = new StreamWriter(new FileStream(path, FileMode.OpenOrCreate));
+
+                    FileOut strm = new FileOut(file.file, folderPath, new StreamWriter(new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite, 8182, FileOptions.Asynchronous), Encoding.UTF8, 32768) { AutoFlush = true, NewLine = Environment.NewLine });
                     this[file.file] = strm;
 
                     if(!string.IsNullOrWhiteSpace(file.alias)) {
@@ -83,7 +84,7 @@ namespace Factory.Renderer.FileOut {
 
         public virtual void Dispose() {
             Close();
-            foreach(KeyValuePair<string, StreamWriter> kv in writers){
+            foreach(KeyValuePair<string, FileOut> kv in writers){
                 kv.Value.Dispose();
             }
         }
