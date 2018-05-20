@@ -25,13 +25,13 @@ namespace Renderer.Controllers {
                                 Y = 1,
                                 XSpan = 1
                             },
-                            new Image(@"E:\Neumont\C#\CSC360\Factory\WPFRenderer\resources\captivating-pic-of-rotterdam-in-a-bubble.jpg", true){
+                            new Image(@"http://www.theamazingpics.com/includes/img/pics/captivating-pic-of-rotterdam-in-a-bubble.jpg", true){
                                 X = 0,
                                 Y = 0,
                                 YSpan = 1,
                                 XSpan = 1
                             },
-                            new Image(@"E:\Neumont\C#\CSC360\Factory\WPFRenderer\resources\captivating-pic-of-rotterdam-in-a-bubble.jpg", false){
+                            new Image(@"http://www.theamazingpics.com/includes/img/pics/captivating-pic-of-rotterdam-in-a-bubble.jpg", false){
                                 X = 0,
                                 Y = 2,
                                 YSpan = 0,

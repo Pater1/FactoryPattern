@@ -4,10 +4,15 @@
 @using Factory.Renderer.FileOut
 @using Renderer.Models.HtmlRenderer
 
-@model Root;
+@model Root
 
-@{ 
-    var v = new RendererFactory<CshtmlRenderOut>().Allow<HtmlRenderOut>().ForStringWriter().ForComponent(Model).Render()["View"].ToString();
+@{
+    var rend = new RendererFactory<CshtmlRenderOut>().Allow<HtmlRenderOut>().ForStringWriter().ForComponent(Model).Render();
 }
 
-@Html.Raw(v)
+<div>
+    <style>
+        @Html.Raw(rend["Style"].ToString())
+    </style>
+    @Html.Raw(rend["View"].ToString())
+</div>
