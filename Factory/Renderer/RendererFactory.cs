@@ -5,34 +5,35 @@ using System.Collections.Generic;
 using System.Text;
 using Factory.Renderer.FileOut;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Factory.Renderer {
-    public class RendererFactory<R> where R : RenderOut {
-        public static void BuildAndRender<C>(R renderOut, C component) where C : Component {
-            using(var r = Build(renderOut, component)) {
-                r.Render();
-            }
-        }
-        public static Task BuildAndRenderAsync<C>(R renderOut, C component) where C : Component {
-            using(var r = Build(renderOut, component)) {
-                return r.RenderAsync();
-            }
+    public class RendererTemplate<R, T> 
+    where R : RenderOut
+    where T : TextWriter {
+        private RenderOut<T> renderOut;
+        private IEnumerable<Type> allowedRenderers = new List<Type>();
+
+        public RendererTemplate(RenderOut renderOut, IEnumerable<Type> allowedRenderers, Func<(string extention, string alias), RenderOut, FileOut<T>> fileOutBuilder) {
+            this.renderOut = renderOut.ForWriter<T>(fileOutBuilder);
+            this.allowedRenderers = allowedRenderers;
         }
 
-
-        public static Renderer<R> Build<C>(R renderOut, C component) where C : Component {
-            ComponentRenderer<C, R> rend = Build(component);
-            return new Renderer<R>(renderOut, rend);
+        public RenderOut<R, T> ForComponent<D>(D component)where D: Component{
+            RenderOut<R, T>  ret = new RenderOut<R, T>(renderOut, BuildComponentRendererTree(component));
+            return ret;
         }
 
-        public static ComponentRenderer<C, R> Build<C>(C component) where C : Component {
-            return Build(component, typeof(C)).UpConvert<C>();
+        private ComponentRenderer<D, R> BuildComponentRendererTree<D>(D component) where D : Component {
+            return BuildComponentRendererTree(component, component.GetType()).ForComponent<D>();
         }
-        public static ComponentRenderer<R> Build(Component component, Type componentType) {
-            IEnumerable<Type> renderers = AppDomain.CurrentDomain.GetAssemblies()
+        private ComponentRenderer<R> BuildComponentRendererTree(Component component, Type componentDataType) {
+            IEnumerable<Type> allTypes = AppDomain.CurrentDomain.GetAssemblies()
                                                                     .Select(x => x.GetTypes())
-                                                                    .SelectMany(x => x)
-                                                                    .Where(x => typeof(ComponentRenderer<,>).MakeGenericType(componentType, typeof(R)).IsAssignableFrom(x));
+                                                                    .SelectMany(x => x);
+            IEnumerable<Type> allRs = allowedRenderers.Select(x => typeof(ComponentRenderer<,>).MakeGenericType(componentDataType, x)).ToArray();
+            IEnumerable<Type> renderers = allTypes.Where(x => allRs.Where(check => check.IsAssignableFrom(x)).Any()).ToArray();
+
             int rendererCount = renderers.Count();
             if(rendererCount < 1) {
                 throw new ArgumentException($"There are no known component renderers for a {component} for the renderer type specified.");
@@ -43,10 +44,40 @@ namespace Factory.Renderer {
             ComponentRenderer<R> rendererInstance = Activator.CreateInstance(renderers.First(), component) as ComponentRenderer<R>;
 
             foreach(Component c in component) {
-                rendererInstance.Add(Build(c, c.GetType()));
+                rendererInstance.Add(BuildComponentRendererTree(c, c.GetType()));
             }
 
             return rendererInstance;
         }
+
+    }
+    public class RendererFactory<R> where R : RenderOut, new() {
+        private R renderer;
+        private ICollection<Type> allowedRenderers = new List<Type>();
+        public RendererFactory(){
+            renderer = new R();
+            allowedRenderers.Add(typeof(R));
+        }
+
+        public RendererFactory<R2> Allow<R2>() where R2: RenderOut, new(){
+            RendererFactory<R2> ret = new RendererFactory<R2>();
+            ret.renderer = this.renderer as R2;
+
+            if(ret.renderer == null){
+                throw new InvalidCastException($"TMP");
+            }
+
+            allowedRenderers.Add(typeof(R2));
+            ret.allowedRenderers = this.allowedRenderers;
+            return ret;
+        }
+
+        public RendererTemplate<R, T> ForWriter<T>(Func<(string extention, string alias), RenderOut, FileOut<T>> fileOutBuilder) where T: TextWriter{
+            return new RendererTemplate<R, T>(renderer, allowedRenderers, fileOutBuilder);
+        }
+
+        public RendererTemplate<R, StringWriter> ForStringWriter() => ForWriter(((string extention, string alias) file, RenderOut rout) => new FileOut<StringWriter>(new StringWriter()));
+        public RendererTemplate<R, StreamWriter> ForStreamWriter(Stream toWriteTo) => ForWriter(((string extention, string alias) file, RenderOut rout) => new FileOut<StreamWriter>(new StreamWriter(toWriteTo)));
+        public RendererTemplate<R, StreamWriter> ForFileStreamWriter(string baseFileFullPath) => ForWriter(((string extention, string alias) file, RenderOut rout) => new FileOut<StreamWriter>(new StreamWriter(new FileStream(baseFileFullPath + file.extention, FileMode.Create))));
     }
 }

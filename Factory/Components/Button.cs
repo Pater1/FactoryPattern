@@ -1,10 +1,15 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Factory.Components {
+    [JsonObject(MemberSerialization.Fields)]
     public class Button: Component {
-        private string text, funcLink;
+        [JsonProperty]
+        private string text;
+        [JsonProperty]
+        private string funcLink;
 
         public override ChildrenHandling ChildrenSupported => ChildrenHandling.single;
         public override Component Child {
@@ -26,6 +31,7 @@ namespace Factory.Components {
             this.FuncLink = funcLink;
         }
 
+        [JsonProperty]
         public string Text {
             get {
                 return text;
@@ -38,6 +44,7 @@ namespace Factory.Components {
             }
         }
 
+        [JsonProperty]
         public string FuncLink {
             get {
                 return funcLink;

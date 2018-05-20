@@ -3,12 +3,21 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
+using Newtonsoft.Json;
 
 namespace Factory.Components {
+    [JsonObject(MemberSerialization.Fields)]
     public abstract class Component: ICollection<Component> {
+        public Guid ID { get; private set; }
+        public Component(){
+            ID = Guid.NewGuid();
+        }
+
         #region GridPositioning
+        [JsonProperty]
         private int x, y, xSpan, ySpan;
 
+        [JsonProperty]
         public int X {
             get {
                 return x;
@@ -18,6 +27,7 @@ namespace Factory.Components {
                 x = value > 0 ? value : 0;
             }
         }
+        [JsonProperty]
         public int Y {
             get {
                 return y;
@@ -27,6 +37,7 @@ namespace Factory.Components {
                 y = value > 0 ? value : 0;
             }
         }
+        [JsonProperty]
         public int XSpan {
             get {
                 return xSpan;
@@ -36,6 +47,7 @@ namespace Factory.Components {
                 xSpan = value > 0 ? value : 0;
             }
         }
+        [JsonProperty]
         public int YSpan {
             get {
                 return ySpan;
@@ -56,6 +68,7 @@ namespace Factory.Components {
         }
         public virtual ChildrenHandling ChildrenSupported => ChildrenHandling.none;
 
+        [JsonProperty]
         private List<Component> children = new List<Component>();
         public virtual List<Component> Children {
             get {

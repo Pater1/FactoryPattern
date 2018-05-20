@@ -3,6 +3,7 @@ using Factory.Renderer;
 using Renderer.Models.HtmlRenderer;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace Renderer.Models.HtmlRenderer.Components {
@@ -10,7 +11,7 @@ namespace Renderer.Models.HtmlRenderer.Components {
         public HtmlButtonRenderer(Button RendererDataObject) : base(RendererDataObject) {}
 
         public override void Render(HtmlRenderOut writer, ComponentRenderer<HtmlRenderOut> parent = null) {
-            writer.WriteLine("View", $"<a href=\"{_RendererDataObject.FuncLink}\">");
+            writer.WriteLine("View", $"<a href=\"{RendererDataObject.FuncLink}\" guid=\"{RendererDataObject.ID.ToString()}\">");
             writer["View"].Indent++;
 
             writer.WriteLine("View", $"<button type=\"button\">");

@@ -2,6 +2,7 @@
 using Factory.Renderer;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace WPFRenderer.XamlRenderer.Components {
@@ -12,10 +13,10 @@ namespace WPFRenderer.XamlRenderer.Components {
             //writer.WriteLine("CodeBehind", "Grid " + VariableName + " = new Grid();");
             //writer.WriteLine("CodeBehind", VariableName + ".ShowGridLines = true;");
 
-            //writer.WriteLine("CodeBehind", "for(int x = 0; x < " + _RendererDataObject.X + "; x++) {");
+            //writer.WriteLine("CodeBehind", "for(int x = 0; x < " + RendererDataObject.X + "; x++) {");
             //writer["CodeBehind"].Indent++;
             //    writer.WriteLine("CodeBehind", "ColumnDefinition gridCol = new ColumnDefinition();");
-            //    writer.WriteLine("CodeBehind", "for(int y = 0; y < " + _RendererDataObject.Y + "; y++) {");
+            //    writer.WriteLine("CodeBehind", "for(int y = 0; y < " + RendererDataObject.Y + "; y++) {");
             //    writer["CodeBehind"].Indent++;
             //        writer.WriteLine("CodeBehind", "RowDefinition gridRow = new RowDefinition();");
             //        //writer.WriteLine("CodeBehind", "gridRow.Height = new GridLength(45);");
@@ -32,14 +33,14 @@ namespace WPFRenderer.XamlRenderer.Components {
             writer["Xaml"].Indent++;
                 writer.WriteLine("Xaml", $"<Grid.ColumnDefinitions>");
                 writer["Xaml"].Indent++;
-                    for(int i = 0; i < _RendererDataObject.X; i++){ 
+                    for(int i = 0; i < RendererDataObject.X; i++){ 
                     writer.WriteLine("Xaml", $"<ColumnDefinition Width=\"*\"/>");
                     }
                 writer["Xaml"].Indent--;
                 writer.WriteLine("Xaml", $"</Grid.ColumnDefinitions>");
                 writer.WriteLine("Xaml", $"<Grid.RowDefinitions>");
                 writer["Xaml"].Indent++;
-                    for(int i = 0; i < _RendererDataObject.Y; i++){ 
+                    for(int i = 0; i < RendererDataObject.Y; i++){ 
                     writer.WriteLine("Xaml", $"<RowDefinition Height=\"*\"/>");
                     }
                 writer["Xaml"].Indent--;

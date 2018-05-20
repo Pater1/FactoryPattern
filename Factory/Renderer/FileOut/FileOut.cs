@@ -4,45 +4,74 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Factory.Renderer.FileOut{
-    public sealed class FileOut: IDisposable {
-        StreamWriter stream;
-        public FileOut(string fileName, string folderPath, StreamWriter sw){
-            File = fileName;
-            Folder = folderPath;
-            stream = sw ?? throw new ArgumentException("Stream writer cannot be null!");
+namespace Factory.Renderer.FileOut {
+    public abstract class FileOut: TextWriter, IDisposable {
+
+        private Dictionary<string, object> backingDB = new Dictionary<string, object>();
+        public object this[string key] {
+            get {
+                if(backingDB.ContainsKey(key)) {
+                    return backingDB[key];
+                } else {
+                    return null;
+                }
+            }
+            set {
+                if(backingDB.ContainsKey(key)) {
+                    backingDB[key] = value;
+                } else {
+                    backingDB.Add(key, value);
+                }
+            }
         }
 
-        public string File { get; private set; }
-        public string Folder { get; private set; }
-        public string FullPath => Path.Combine(Folder, File);
-
         public uint Indent { get; set; } = 0;
-        private string ndnt{
-            get{
+        protected string TabbedIndent {
+            get {
                 string ret = "";
-                for(int i = 0; i < Indent; i++){
+                for(int i = 0; i < Indent; i++) {
                     ret += "    ";
                 }
                 return ret;
             }
         }
 
-        public void Write(string value) {
-            stream.Write(value);
+    }
+    public sealed class FileOut<T>: FileOut where T: TextWriter {
+        private T stream;
+        public T Stream {
+            get {
+                return stream;
+            }
+
+            internal set {
+                stream = value;
+            }
         }
-        public Task WriteAsync(string value) {
-            return stream.WriteAsync(value);
-        }
-        public void WriteLine(string value) {
-            stream.WriteLine(ndnt + value);
-        }
-        public Task WriteLineAsync(string value) {
-            return stream.WriteLineAsync(ndnt + value);
+        
+        public FileOut(T sw) {
+            Stream = sw ?? throw new ArgumentException("Stream writer cannot be null!");
         }
 
-        public void Dispose() {
-            stream.Dispose();
+        public override Encoding Encoding => Stream.Encoding;
+        
+        public override void Write(string value) {
+            Stream.Write(value);
+            Stream.Flush();
+        }
+        public override Task WriteAsync(string value) {
+            return Stream.WriteAsync(value).ContinueWith((x) => Stream.FlushAsync());
+        }
+        public override void WriteLine(string value) {
+            Stream.WriteLine(TabbedIndent + value);
+            Stream.Flush();
+        }
+        public override Task WriteLineAsync(string value) {
+            return Stream.WriteLineAsync(TabbedIndent + value).ContinueWith((x) => Stream.FlushAsync());
+        }
+
+        protected override void Dispose(bool disposing = true) {
+            Stream.Dispose();
         }
     }
 }

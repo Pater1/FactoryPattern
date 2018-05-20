@@ -1,0 +1,13 @@
+﻿@using System.IO
+@using Factory.Renderer
+@using Factory.Components
+@using Factory.Renderer.FileOut
+@using Renderer.Models.HtmlRenderer
+
+@model Root;
+
+@{ 
+    var v = new RendererFactory<CshtmlRenderOut>().Allow<HtmlRenderOut>().ForStringWriter().ForComponent(Model).Render()["View"].ToString();
+}
+
+@Html.Raw(v)

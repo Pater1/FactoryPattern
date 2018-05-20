@@ -1,5 +1,6 @@
 ﻿using Factory.Components;
 using Factory.Renderer;
+using System.IO;
 
 namespace Renderer.Models.HtmlRenderer.Components {
     public class HtmlTextBoxRenderer: ComponentRenderer<TextBox, HtmlRenderOut> {
@@ -8,7 +9,7 @@ namespace Renderer.Models.HtmlRenderer.Components {
         public override void Render(HtmlRenderOut writer, ComponentRenderer<HtmlRenderOut> parent = null) {
             writer.WriteLine("View", $"<p>");
             writer["View"].Indent++;
-            writer.WriteLine("View", _RendererDataObject.Text);
+            writer.WriteLine("View", RendererDataObject.Text);
             writer["View"].Indent--;
             writer.WriteLine("View", $"</p>");
         }

@@ -7,24 +7,10 @@ using Factory.Components;
 using Factory.Renderer.FileOut;
 
 namespace Factory.Renderer {
+    public interface IComponentRenderer {
 
-    public abstract class ComponentRenderer<R>: ICollection<ComponentRenderer<R>> where R : RenderOut {
-        protected object data;
-        public object _RendererDataObject { 
-            get {
-                return data;
-            }
-            internal set {
-                data = value;
-            }
-        }
-        protected ComponentRenderer(object RendererDataObject) {
-            _RendererDataObject = RendererDataObject;
-        }
-        internal ComponentRenderer() { }
-
-        internal ICollection<ComponentRenderer<R>> children = new List<ComponentRenderer<R>>();
-        
+    }
+    public abstract class ComponentRenderer<R>: IComponentRenderer, ICollection<ComponentRenderer<R>> where R : RenderOut {
         public virtual void RenderChildren(R writer) {
             foreach(ComponentRenderer<R> child in children) {
                 child.Render(writer, this);
@@ -37,9 +23,11 @@ namespace Factory.Renderer {
             return Task.CompletedTask;
         }
 
-        public ComponentRenderer<D,R> UpConvert<D>() where D: Component => this as ComponentRenderer<D, R>;
-
         #region ICollection<ComponentRenderer>
+        internal ICollection<ComponentRenderer<R>> children = new List<ComponentRenderer<R>>();
+
+        internal ComponentRenderer<D, R> ForComponent<D>() where D : Component => (ComponentRenderer<D, R>)this;
+
         public int Count => children.Count;
 
         public bool IsReadOnly => children.IsReadOnly;
@@ -73,22 +61,32 @@ namespace Factory.Renderer {
         }
         #endregion
     }
-    public abstract class ComponentRenderer<D, R>: ComponentRenderer<R> 
-        where D: Component 
-        where R: RenderOut
-    {
-        protected ComponentRenderer(D RendererDataObject) {
-            _RendererDataObject = RendererDataObject;
+    public abstract class ComponentRenderer<D, R>: ComponentRenderer<R>, IComponentRenderer where R : RenderOut where D : Component {
+        protected internal ComponentRenderer(D RendererDataObject) {
+            this.RendererDataObject = RendererDataObject;
         }
-        internal ComponentRenderer() { }
 
-        public new D _RendererDataObject {
-            get {
-                return (D)base._RendererDataObject;
-            }
-            internal set {
-                base._RendererDataObject = value;
-            }
+        public D RendererDataObject {
+            get;
+            internal set;
         }
+
+        protected internal ComponentRenderer() { }
     }
+    //public abstract class ComponentRenderer<D, R>: ComponentRenderer<R>, IComponentRenderer where R : RenderOut where D : Component {
+    //    protected internal ComponentRenderer(D RendererDataObject) {
+    //        RendererDataObject = RendererDataObject;
+    //    }
+
+    //    public D RendererDataObject {
+    //        get {
+    //            return RendererDataObject;
+    //        }
+    //        internal set {
+    //            RendererDataObject = value;
+    //        }
+    //    }
+
+    //    protected internal ComponentRenderer() { }
+    //}
 }

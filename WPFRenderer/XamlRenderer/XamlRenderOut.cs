@@ -7,12 +7,16 @@ using System.Threading.Tasks;
 
 namespace WPFRenderer.XamlRenderer {
     public class XamlRenderOut: RenderOut {
-        public XamlRenderOut(string folderPath, string fileNameBase) :
-            this(folderPath, fileNameBase, "xaml", "xaml.cs") { }
-        protected XamlRenderOut(string folderPath, string fileNameBase, params string[] extentions) :
-            base(folderPath, ($"{fileNameBase}.{extentions[0]}", "Xaml"), ($"{fileNameBase}.{extentions[1]}", "CodeBehind")) { }
-
-        protected override void Setup() {}
-        protected override void Close() {}
+        public override IEnumerable<(string extention, string alias)> RequiredFileExtentionsWithAlias {
+            get {
+                return new(string file, string alias)[] {
+                    (".xaml", "Xaml"),
+                    (".xaml.cs", "CodeBehind")
+                };
+            }
+        }
+        
+        public override void Setup() {}
+        public override void Close() {}
     }
 }

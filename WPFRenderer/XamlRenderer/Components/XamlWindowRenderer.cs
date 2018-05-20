@@ -2,6 +2,7 @@
 using Factory.Renderer;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace WPFRenderer.XamlRenderer.Components {

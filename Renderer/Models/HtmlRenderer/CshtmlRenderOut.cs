@@ -7,14 +7,22 @@ using System.Threading.Tasks;
 
 namespace Renderer.Models.HtmlRenderer {
     public class CshtmlRenderOut: HtmlRenderOut {
-        public CshtmlRenderOut(string folderPath, string fileNameBase) :
-            base(folderPath, fileNameBase, "cshtml", "css", "js") { }
+        public override IEnumerable<(string extention, string alias)> RequiredFileExtentionsWithAlias {
+            get {
+                return new(string extention, string alias)[] {
+                    ($".cshtml", "View"),
+                    ($".css", "Style"),
+                    ($".js", "Logic")
+                };
+            }
+        }
+        public CshtmlRenderOut() { }
         
-        protected override void Setup() {
-            this["View"].WriteLine($"<link rel=\"stylesheet\" type=\"text/css\" href=\"{this["Style"].File}\">");
-            this["View"].WriteLine($"<script src=\"{this["Logic"].File}\"></script>");
+        public override void Setup() {
+            this["View"].WriteLine($"<link rel=\"stylesheet\" type=\"text/css\" href=\"{this["Style"]["File"] as string}\">");
+            this["View"].WriteLine($"<script src=\"{this["Logic"]["File"] as string}\"></script>");
             this["View"].WriteLine("");
         }
-        protected override void Close() {}
+        public override void Close() {}
     }
 }

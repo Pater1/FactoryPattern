@@ -1,10 +1,16 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Factory.Components {
+    [JsonObject(MemberSerialization.Fields)]
     public class Grid: Component {
+        [JsonProperty]
         private int width;
+        [JsonProperty]
+        private int height;
+        [JsonProperty]
         public int Width {
             get {
                 return width;
@@ -14,7 +20,7 @@ namespace Factory.Components {
                 width = value > 1 ? value : 1;
             }
         }
-        private int height;
+        [JsonProperty]
         public int Height {
             get {
                 return height;
