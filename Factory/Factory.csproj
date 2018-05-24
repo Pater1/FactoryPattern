@@ -5,7 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.DataAnnotations" Version="2.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.AspNetCore.Mvc.DataAnnotations">
+      <HintPath>C:\Users\Patrick Conner\.nuget\packages\microsoft.aspnetcore.mvc.dataannotations\2.0.4\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.DataAnnotations.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting">
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\TestTools\TeamExplorerClient\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,16 @@
+﻿@using Factory.Commands
+
+@model RemoveAsChildCommand
+
+@{
+    Guid formID = Guid.NewGuid();
+}
+
+<form data-ID="@formID" asp-action="PostCommand">
+    <input name="CommandType" type="hidden" value="@Model.GetType().Name" />
+    <input name="ViewObjectKeyString" type="hidden" value="@Model.ViewObjectKey" />
+
+    <button type="button" onclick="PostCommand('@formID')">
+        Remove
+    </button>
+</form>

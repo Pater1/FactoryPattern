@@ -1,4 +1,5 @@
 ﻿using Factory.Components;
+using Factory.Renderer.Components;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -144,7 +145,6 @@ namespace Factory.Renderer.FileOut {
         private RenderOut<T> baseRenderOut;
         public RenderOut(R implementedRenderOut) {
             this.implementedRenderOut = implementedRenderOut;
-
         }
 
         public RenderOut(RenderOut<T> renderOut, ComponentRenderer<R> componentRenderer) {
@@ -157,6 +157,33 @@ namespace Factory.Renderer.FileOut {
         }
 
         internal ComponentRenderer<R> componentRenderer;
+        internal ICollection<MonkeyPatch<R>> patches = new List<MonkeyPatch<R>>();
+        public RenderOut<R, T> MonkeyPatchChildren(MonkeyPatch<R> patch) {
+            foreach(ComponentRenderer<R> compRend in componentRenderer) {
+                compRend.TryMonkeyPatch(patch);
+            }
+            return this;
+        }
+        public RenderOut<R, T> MonkeyPatch(MonkeyPatch<R> patch) {
+            patches.Add(patch);
+            return this;
+        }
+        public RenderOut<R, T> MonkeyPatchChildren(IEnumerable<MonkeyPatch<R>> patch) {
+            if(patch != null) {
+                foreach(MonkeyPatch<R> mp in patch) {
+                    MonkeyPatchChildren(mp);
+                }
+            }
+            return this;
+        }
+        public RenderOut<R, T> MonkeyPatch(IEnumerable<MonkeyPatch<R>> patch) {
+            if(patch != null) {
+                foreach(MonkeyPatch<R> mp in patch) {
+                    MonkeyPatch(mp);
+                }
+            }
+            return this;
+        }
 
         public Dictionary<string, T> Render() {
             componentRenderer.Render(implementedRenderOut);

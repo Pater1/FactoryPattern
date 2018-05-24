@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Factory.Components;
 using Factory.Renderer.FileOut;
+using Factory.Renderer.Components;
 
 namespace Factory.Renderer {
     public interface IComponentRenderer {
@@ -53,17 +54,51 @@ namespace Factory.Renderer {
         }
 
         public IEnumerator<ComponentRenderer<R>> GetEnumerator() {
-            return children.GetEnumerator();
+            yield return this;
+            foreach(ComponentRenderer<R> child in children){
+                foreach(ComponentRenderer<R> grandChild in child) {
+                    yield return grandChild;
+                }
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
-            return children.GetEnumerator();
+            return this.GetEnumerator();
         }
+        
+        public abstract bool TryMonkeyPatch(MonkeyPatch<R> patch);
         #endregion
     }
     public abstract class ComponentRenderer<D, R>: ComponentRenderer<R>, IComponentRenderer where R : RenderOut where D : Component {
         protected internal ComponentRenderer(D RendererDataObject) {
             this.RendererDataObject = RendererDataObject;
+        }
+
+        public ICollection<MonkeyPatch<R>> patches = new List<MonkeyPatch<R>>();
+        public virtual void RenderMonkeyPatches(R renderer){
+            foreach(MonkeyPatch<R> patch in patches){
+                patch.WritePatch(renderer, this);
+            }
+        }
+
+
+        public override bool TryMonkeyPatch(MonkeyPatch<R> patch) {
+            Type[] patchType = patch.GetType().GetGenericArguments();
+            bool patchable = patchType.Length == 2?
+                patchType[0].IsAssignableFrom(typeof(D))
+                && patchType[1].IsAssignableFrom(typeof(R))
+                ://patchType.Length == 1
+                patchType[0].IsAssignableFrom(typeof(R));
+
+            if(patchable) {
+                patches.Add(patch);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        public void MonkeyPatch(MonkeyPatch<D, R> patch) {
+            patches.Add(patch);
         }
 
         public D RendererDataObject {
@@ -73,20 +108,4 @@ namespace Factory.Renderer {
 
         protected internal ComponentRenderer() { }
     }
-    //public abstract class ComponentRenderer<D, R>: ComponentRenderer<R>, IComponentRenderer where R : RenderOut where D : Component {
-    //    protected internal ComponentRenderer(D RendererDataObject) {
-    //        RendererDataObject = RendererDataObject;
-    //    }
-
-    //    public D RendererDataObject {
-    //        get {
-    //            return RendererDataObject;
-    //        }
-    //        internal set {
-    //            RendererDataObject = value;
-    //        }
-    //    }
-
-    //    protected internal ComponentRenderer() { }
-    //}
 }

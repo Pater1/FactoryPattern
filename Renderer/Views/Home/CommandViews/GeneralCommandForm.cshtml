@@ -1,0 +1,26 @@
+﻿@using Factory.Commands
+
+@model GeneralCommand
+
+@{
+    Guid formID = Guid.NewGuid();
+}
+
+<form data-ID="@formID" asp-action="PostCommand">
+    <input name="CommandType" type="hidden" value="@Model.GetType().Name" />
+    <input name="ViewObjectKeyString" type="hidden" value="@Model.ViewObjectKey" />
+
+    <input name="UpdateParameterName" type="hidden" value="@Model.UpdateParameterName" />
+    <input name="UpdatePropertyType" type="hidden" value="@Model.UpdatePropertyType" />
+    <input name="UpdateParameterValue" type="@Model.HtmlType" value="@Model.UpdateParameterValue" />
+    <input name="UpdateCallType" type="hidden" value="@Model.UpdateCallType" />
+
+    <input name="UndoParameterName" type="hidden" value="@Model.UndoParameterName" />
+    <input name="UndoPropertyType" type="hidden" value="@Model.UndoPropertyType" />
+    <input name="UndoParameterValue" type="hidden" value="@Model.UndoParameterValue" />
+    <input name="UndoCallType" type="hidden" value="@Model.UndoCallType" />
+
+    <button type="button" onclick="PostCommand('@formID')">
+        Apply
+    </button>
+</form>

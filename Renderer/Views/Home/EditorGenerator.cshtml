@@ -1,0 +1,17 @@
+﻿@using Factory.Commands
+@using Factory.Components
+
+@model Dictionary<Component, IEnumerable<Command>>
+
+<div>
+@foreach(KeyValuePair<Component, IEnumerable<Command>> kv in Model) {
+    <div>
+        <h4>@(kv.Key.GetType().Name):</h4>
+        @foreach(Command command in kv.Value) {
+        <div>
+            @Html.Partial(("CommandViews/" + command.GetType().Name + "Form"), command)
+        </div>
+        }
+    </div>
+}
+</div>

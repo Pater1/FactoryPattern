@@ -1,11 +1,232 @@
-﻿<div>
+﻿@using Factory.Components
+@using Factory.Renderer
+@using Factory.Components
+@using Renderer.Models.HtmlRenderer
+@using Factory.Renderer.Components
+
+@{
+    MonkeyPatch<HtmlRenderOut> patches = new MonkeyPatch<HtmlRenderOut>() {
+        patches = new List<Patch>{
+                //new Write("Logic", "$(\"[data-guid='"),
+                //new WriteProperty<Component>("Logic", "ID"),
+                //new Write("Logic", "']\")"),
+
+                //new Write("Logic", "function(e) {"),
+                //new WriteLine("Logic", ""),
+
+                //new Write("Logic", "Include(\""),
+                //new WriteProperty<Component>("Logic", "ID"),
+                //new WriteLine("Logic", "\");"),
+
+                //new Write("Logic", "$(\"[data-guid='"),
+                //new WriteProperty<Component>("Logic", "ID"),
+                //new Write("Logic", "']\")"),
+
+                #region fail 2
+//                new Write("Logic", "$(\"[data-guid='"),
+//                new WriteProperty<Component>("Logic", "ID"),
+//                new Write("Logic", "']\")"),
+
+//                new WriteLine("Logic",
+//@".ready(function(){"),
+//                new Write("Logic", "    $(\"[data-guid='"),
+//                new WriteProperty<Component>("Logic", "ID"),
+//                new Write("Logic", "']\")"),
+//                new WriteLine("Logic",
+//@".oncontextmenu = function() {return false;};"),
+//                new Write("Logic", "    $(\"[data-guid='"),
+//                new WriteProperty<Component>("Logic", "ID"),
+//                new Write("Logic", "']\")"),
+//new WriteLine("Logic",
+//@".on('mousedown',function(e){
+//        if(e.button == 2) {"),
+//                new Write("Logic", "          alert(\""),
+//                new WriteProperty<Component>("Logic", "ID"),
+//                new WriteLine("Logic", "\");"),
+//                new WriteLine("Logic",
+//@"          return false;
+//        }
+//        return true;
+//    }); 
+//});"),
+                #endregion
+                //new Write("Logic", "}"),
+
+                //new Write("Logic", ", false);"),
+                //new WriteLine("Logic", ""),
+                //new WriteLine("Logic", ""),
+            }
+    };
+    if(ViewData["Patches"] == null) {
+        ViewData["Patches"] = new List<MonkeyPatch<HtmlRenderOut>>();
+    }
+    ((List<MonkeyPatch<HtmlRenderOut>>)ViewData["Patches"]).Add(patches);
+}
+
+<style>
+</style>
+<div id="editorPage">
+    <div id="Data" style="display: none;">
+        <div id="Json">
+            @ViewData["Json"]
+        </div>
+        <div id="Page">
+            @ViewData["Title"]
+        </div>
+    </div>
     <div id="pageView">
         @await Html.PartialAsync("Generator", ViewData["Root"])
     </div>
     <div id="editorTooltip">
-
     </div>
-</div>
-<script>
+    <script>
+        if (document.addEventListener) {
+            document.addEventListener('contextmenu', function (e) {
+                //alert("former"); //here you draw your own menu
+                let mousePlace = MousePlace(e);
+                let keys = ElementsUnder(mousePlace.X, mousePlace.Y);
+                KeysChange(keys, mousePlace.X, mousePlace.Y);
+                e.preventDefault();
+            }, false);
+        } else {
+            document.attachEvent('oncontextmenu', function () {
+                alert("Sorry! Site editing is not supported on your browser.");
+                window.event.returnValue = false;
+            });
+        }
 
-</script>
+        function MousePlace(e) {
+            return { X: e.clientX, Y: e.clientY };
+        }
+        function ElementsUnder(x, y) {
+            var elements = [], stack =[];
+
+            elements = $(':hover');
+            for (var i = 0; i < elements.length; i += 1) {
+                let guid = elements[i].getAttribute("data-guid");
+                if (guid != null) {
+                    stack.push(guid);
+                }
+            }
+
+            return stack;
+        };
+
+        var activeKeys = null;
+        var timeout;
+        function KeysChange(keys, mouseX, mouseY) {
+            if (activeKeys == null) {
+                activeKeys = keys;
+                UpdateEditorTooltip(mouseX, mouseY);
+            } else {
+                ClearEditorTooltip();
+            }
+        }
+
+        function ClearEditorTooltip() {
+            $("#editorTooltip").hide();
+            activeKeys = null;
+        }
+        function UpdateEditorTooltip(mouseX, mouseY) {
+            var page = $("#Page").text().replace(/\s/g, '');
+
+            var url = window.location.protocol + "//" + window.location.host + "/update/edit/" + page;
+
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.readyState == 4 && request.status == 200) {
+                    ApplyUpdateEditorTooltip(request.responseText);
+                }
+            };
+            request.open("POST", url);
+            request.setRequestHeader("CompJson", $("#Json").text().replace(/\s/g, ''));
+            request.setRequestHeader("ActiveKeys", activeKeys.join(","));
+            request.send();
+            
+            $("#editorTooltip").css("position", "absolute").css("top", mouseY + "px").css("left", mouseX + "px")
+        }
+        function ApplyUpdateEditorTooltip(responseText) {
+            $("#editorTooltip").empty();
+            $("#editorTooltip").append(responseText);
+            $("#editorTooltip").show();
+        }
+
+        function UpdateVeiw() {
+            UpdateVeiw(null);
+        }
+        function UpdateVeiw(modify) {
+            var page = $("#Page").text().replace(/\s/g, '');
+
+            var url = window.location.protocol + "//" + window.location.host + "/update/view/" + page;
+
+            if (modify != null) {
+                url += "/" + modify;
+            }
+
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.readyState == 4 && request.status == 200) {
+                    ApplyUpdateView(request.responseText);
+                }
+            };
+            request.open("POST", url);
+            request.setRequestHeader("CompJson", $("#Json").text().replace(/\s/g, ''));
+            request.send();
+        }
+        function ApplyUpdateView(responseText) {
+            $("#pageView").empty();
+            $("#pageView").append(responseText);
+
+            var css = $("#RenderedStyle").text().replace(/\s/g, '');
+            $("#AppliedStyle").empty().append(css);
+
+            var json = $("#CompressedSource").text().replace(/\s/g, '');
+            $("#Json").empty().append(json);
+            ClearEditorTooltip();
+            $("#Json").hide();
+        }
+
+        function PostCommand(guid) {
+            let postDat = $("[data-ID=" + guid + "]").serializeArray();
+
+            var page = $("#Page").text().replace(/\s/g, '');
+            var url = window.location.protocol + "//" + window.location.host + "/update/command/" + page;
+
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (request.readyState == 4 && request.status == 200) {
+                    ApplyPostCommand(request.responseText);
+                }
+            };
+            request.open("POST", url);
+            request.setRequestHeader("CompJson", $("#Json").text().replace(/\s/g, ''));
+            request.setRequestHeader("CommandData", JSON.stringify(postDat));
+            request.send();
+        }
+        function ApplyPostCommand(responseText) {
+            $("#Json").empty().append(responseText);
+            ClearEditorTooltip();
+            UpdateVeiw();
+            $("#Json").hide();
+        }
+
+        $(window).bind('keydown', function (event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (String.fromCharCode(event.which).toLowerCase()) {
+                    case 's':
+                        event.preventDefault();
+                        UpdateVeiw("save");
+                        break;
+                    case 'y':
+                        event.preventDefault();
+                        UpdateVeiw("redo");
+                        break;
+                    case 'z':
+                        event.preventDefault();
+                        UpdateVeiw("undo");
+                        break;
+                }
+            }
+        });
+    </script>
+</div>

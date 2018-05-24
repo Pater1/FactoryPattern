@@ -1,18 +1,14 @@
-﻿@using System.IO
-@using Factory.Renderer
-@using Factory.Components
-@using Factory.Renderer.FileOut
-@using Renderer.Models.HtmlRenderer
-
-@model Root
-
-@{
-    var rend = new RendererFactory<CshtmlRenderOut>().Allow<HtmlRenderOut>().ForStringWriter().ForComponent(Model).Render();
-}
-
-<div>
-    <style>
-        @Html.Raw(rend["Style"].ToString())
+﻿<div>
+    <style id="RenderedStyle">
+        @Html.Raw(ViewData["RenderedStyle"].ToString())
     </style>
-    @Html.Raw(rend["View"].ToString())
+    <div>
+        @Html.Raw(ViewData["RenderedView"].ToString())
+    </div>
+    <div id="CompressedSource" style="display:none">
+        @Html.Raw(ViewData["CompressedSource"].ToString())
+    </div>
+    <script>
+        @Html.Raw(ViewData["RenderedLogic"].ToString())
+    </script>
 </div>

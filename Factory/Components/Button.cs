@@ -1,11 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Factory.Commands;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Factory.Components {
     [JsonObject(MemberSerialization.Fields)]
-    public class Button: Component {
+    public partial class Button: Component {
         [JsonProperty]
         private string text;
         [JsonProperty]
@@ -29,6 +30,10 @@ namespace Factory.Components {
         public Button(string text, string funcLink) {
             this.Text = text;
             this.FuncLink = funcLink;
+        }
+        public Button() {
+            this.Text = "default text goes here!";
+            this.FuncLink = "http://google.com";
         }
 
         [JsonProperty]
@@ -54,6 +59,29 @@ namespace Factory.Components {
                 if(value != null) {
                     funcLink = value;
                 }
+            }
+        }
+
+        public override IEnumerable<Command> Commands {
+            get {
+                foreach(Command cmb in base.Commands) {
+                    yield return cmb;
+                }
+                yield return GeneralCommand.Build(
+                    UltimateParent,
+                    ID,
+                    CallType.Property,
+                    "Text",
+                    Text
+                );
+                yield return GeneralCommand.Build(
+                    UltimateParent,
+                    ID,
+                    CallType.Property,
+                    "FuncLink",
+                    FuncLink,
+                    "url"
+                );
             }
         }
     }

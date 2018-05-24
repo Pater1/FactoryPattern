@@ -17,4 +17,8 @@
     <ProjectReference Include="..\Factory\Factory.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Generated\" />
+  </ItemGroup>
+
 </Project>

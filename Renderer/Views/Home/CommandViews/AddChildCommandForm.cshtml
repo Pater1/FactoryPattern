@@ -1,0 +1,19 @@
+﻿@using Factory.Commands
+
+@model AddChildCommand
+
+@{
+    Guid formID = Guid.NewGuid();
+}
+
+<form data-ID="@formID" asp-action="PostCommand">
+    <input name="CommandType" type="hidden" value="@Model.GetType().Name" />
+    <input name="ViewObjectKeyString" type="hidden" value="@Model.ViewObjectKey" />
+    <select asp-for="@Model.AddedComponentType"
+            asp-items="@(new SelectList(AddChildCommand.ComponentTypes))">
+        <option>Please select one</option>
+    </select>
+    <button type="button" onclick="PostCommand('@formID')">
+        Apply
+    </button>
+</form>
